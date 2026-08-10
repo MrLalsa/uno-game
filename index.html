@@ -21,9 +21,12 @@
     --green-light:#5fcb82;
     --blue:#0a66b3;
     --blue-light:#4fa3e3;
-    --panel-glass: rgba(255,255,255,.055);
-    --panel-glass-strong: rgba(255,255,255,.09);
-    --panel-border: rgba(255,255,255,.14);
+    --purple:#7b2fe0;
+    --purple-light:#a56bf0;
+    --pink:#e055c9;
+    --panel-glass: rgba(255,255,255,.06);
+    --panel-glass-strong: rgba(255,255,255,.1);
+    --panel-border: rgba(255,255,255,.15);
     --radius: 18px;
   }
   *{box-sizing:border-box;}
@@ -33,7 +36,9 @@
     min-height:100vh; min-height:100dvh;
     font-family:'Nunito Sans', sans-serif;
     color:var(--cream);
-    background:radial-gradient(ellipse 1500px 950px at 50% 38%, #1c1442 0%, #100c28 55%, #050409 100%);
+    background:
+      radial-gradient(ellipse 1200px 900px at 50% 40%, rgba(165,107,240,.4), transparent 62%),
+      radial-gradient(ellipse 1700px 1100px at 50% 46%, #2a1454 0%, #170a30 55%, #05030c 100%);
     overflow-x:hidden;
     position:relative;
   }
@@ -46,10 +51,11 @@
   /* ---------- ambient background orbs (signature: UNO's 4 colors as living light) ---------- */
   .ambient-orbs{position:fixed; inset:0; overflow:hidden; z-index:0; pointer-events:none;}
   .orb{position:absolute; border-radius:50%; filter:blur(75px);}
-  .orb-red{width:400px; height:400px; background:var(--red); opacity:.28; top:-100px; left:-110px; animation:floatA 15s ease-in-out infinite;}
-  .orb-yellow{width:440px; height:440px; background:var(--amber); opacity:.22; top:-110px; right:-130px; animation:floatB 18s ease-in-out infinite;}
-  .orb-green{width:420px; height:420px; background:var(--green); opacity:.24; bottom:-130px; left:-90px; animation:floatC 17s ease-in-out infinite;}
-  .orb-blue{width:440px; height:440px; background:var(--blue); opacity:.26; bottom:-110px; right:-100px; animation:floatA 20s ease-in-out infinite reverse;}
+  .orb-red{width:400px; height:400px; background:var(--red); opacity:.2; top:-100px; left:-110px; animation:floatA 15s ease-in-out infinite;}
+  .orb-yellow{width:440px; height:440px; background:var(--amber); opacity:.16; top:-110px; right:-130px; animation:floatB 18s ease-in-out infinite;}
+  .orb-green{width:420px; height:420px; background:var(--green); opacity:.17; bottom:-130px; left:-90px; animation:floatC 17s ease-in-out infinite;}
+  .orb-blue{width:440px; height:440px; background:var(--blue); opacity:.19; bottom:-110px; right:-100px; animation:floatA 20s ease-in-out infinite reverse;}
+  .orb-pink{width:520px; height:520px; background:var(--pink); opacity:.16; top:30%; left:50%; margin-left:-260px; animation:floatB 22s ease-in-out infinite;}
   @keyframes floatA{0%,100%{transform:translate(0,0);}50%{transform:translate(34px,22px);}}
   @keyframes floatB{0%,100%{transform:translate(0,0);}50%{transform:translate(-28px,26px);}}
   @keyframes floatC{0%,100%{transform:translate(0,0);}50%{transform:translate(22px,-26px);}}
@@ -119,17 +125,27 @@
   .error-text{color:var(--red-light); font-weight:700; font-size:.9rem; margin-top:10px; min-height:1.2em;}
 
   /* ---------- Avatars ---------- */
-  .avatar{width:38px; height:38px; border-radius:50%; overflow:hidden; display:flex; align-items:center; justify-content:center;
-    background:var(--panel-glass-strong); border:2px solid rgba(255,255,255,.22); flex-shrink:0; transition:all .3s;}
+  .avatar{width:42px; height:42px; border-radius:13px; overflow:hidden; display:flex; align-items:center; justify-content:center;
+    background:var(--panel-glass-strong); border:2.5px solid rgba(255,255,255,.28); flex-shrink:0; transition:all .3s;
+    box-shadow:0 3px 10px rgba(0,0,0,.35);}
   .avatar-img{width:100%; height:100%; object-fit:cover; display:block;}
-  .avatar-initial{font-family:'Lilita One',cursive; font-size:1.05rem; color:var(--cream);}
-  .player-row.active .avatar{border-color:var(--amber); box-shadow:0 0 0 3px rgba(244,180,0,.32), 0 0 16px rgba(244,180,0,.5);}
+  .avatar-initial{font-family:'Lilita One',cursive; font-size:1.15rem; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.4);}
+  #me-avatar{background:linear-gradient(150deg, var(--amber-light), #e0930a);}
+  #me-avatar .avatar-initial{color:#5c3d00; text-shadow:0 1px 1px rgba(255,255,255,.3);}
+  #opp-avatar{background:linear-gradient(150deg, var(--pink), var(--purple));}
+  .player-row.active .avatar{border-color:var(--amber-light); box-shadow:0 0 0 3px rgba(244,180,0,.35), 0 0 18px rgba(244,180,0,.55);}
 
   /* ---------- Game top bar ---------- */
-  .game-topbar{position:fixed; top:0; left:0; right:0; height:58px; display:flex; align-items:center; justify-content:space-between;
-    padding:0 16px; z-index:40; background:linear-gradient(180deg, rgba(8,6,18,.6), transparent);}
-  .topbar-brand{font-family:'Lilita One',cursive; font-size:1.25rem; color:var(--amber-light); letter-spacing:.05em; text-shadow:0 0 18px rgba(244,180,0,.35);}
-  .topbar-actions{display:flex; gap:10px;}
+  .game-topbar{position:absolute; top:0; left:0; right:0; height:58px; display:flex; align-items:center; justify-content:space-between;
+    padding:0 16px; z-index:40; background:linear-gradient(180deg, rgba(8,6,18,.65), transparent);}
+  .topbar-brand{font-family:'Lilita One',cursive; font-size:1.25rem; color:var(--amber-light); letter-spacing:.05em; text-shadow:0 0 18px rgba(244,180,0,.35); flex-shrink:0;}
+  .topbar-actions{display:flex; gap:10px; flex-shrink:0;}
+  .topbar-score{display:flex; align-items:center; gap:8px; font-family:'Lilita One',cursive; font-size:1rem;
+    background:var(--panel-glass-strong); border:1px solid var(--panel-border); border-radius:999px; padding:6px 14px;
+    backdrop-filter:blur(10px);}
+  .topbar-score .score-name{color:var(--cream-dim); font-size:.72rem; font-family:'Nunito Sans',sans-serif; font-weight:700; text-transform:uppercase;}
+  .topbar-score .score-num{color:var(--amber-light); min-width:16px; text-align:center;}
+  .topbar-score .score-trophy{filter:drop-shadow(0 0 6px rgba(244,180,0,.6));}
 
   /* ---------- Game screen layout ---------- */
   .game-screen-wrap{display:flex; flex-direction:row; align-items:stretch; min-height:100vh; min-height:100dvh; width:100%; position:relative; z-index:1;}
@@ -144,8 +160,13 @@
   .opp-fan, .hand-fan{position:relative; height:120px; width:100%; max-width:560px;}
   .hand-fan{height:150px;}
 
-  .table-center{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; width:100%; padding:6px 0; min-height:170px;}
-  .piles-row{display:flex; align-items:center; gap:36px;}
+  .table-center{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; width:100%; padding:6px 0; min-height:170px; position:relative;}
+  .energy-ring{position:absolute; width:300px; height:300px; border-radius:50%; border:2px dashed rgba(229,168,255,.22);
+    top:50%; left:50%; transform:translate(-50%,-50%); animation:ringSpin 24s linear infinite; pointer-events:none; z-index:0;}
+  .energy-ring::before{content:''; position:absolute; inset:-18px; border-radius:50%; border:1px dashed rgba(165,107,240,.18);}
+  .energy-ring::after{content:''; position:absolute; inset:18px; border-radius:50%; border:1px dashed rgba(224,85,201,.16);}
+  @keyframes ringSpin{to{transform:translate(-50%,-50%) rotate(360deg);}}
+  .piles-row{display:flex; align-items:center; gap:36px; position:relative; z-index:1;}
   .pile-wrap{display:flex; flex-direction:column; align-items:center; gap:8px;}
   .pile-label{font-size:.72rem; color:var(--cream-dim); font-weight:700; text-transform:uppercase; letter-spacing:.08em;}
   #draw-pile{position:relative; width:80px; height:114px; cursor:pointer;}
@@ -156,7 +177,7 @@
 
   .turn-banner{font-family:'Lilita One', cursive; font-size:1.25rem; letter-spacing:.03em; padding:8px 22px; border-radius:999px;
     background:var(--panel-glass-strong); border:1px solid var(--panel-border); color:var(--cream-dim); text-align:center; transition:all .25s ease;
-    backdrop-filter:blur(10px);}
+    backdrop-filter:blur(10px); position:relative; z-index:1;}
   .turn-banner.mine{color:var(--ink); background:linear-gradient(135deg, var(--amber-light), var(--amber)); box-shadow:0 0 26px rgba(244,180,0,.55); animation:pulseGlow 1.6s ease-in-out infinite;}
   @keyframes pulseGlow{0%,100%{box-shadow:0 0 18px rgba(244,180,0,.4);}50%{box-shadow:0 0 32px rgba(244,180,0,.75);}}
 
@@ -243,8 +264,41 @@
   .chat-bubble{background:rgba(255,255,255,.08); padding:8px 13px; border-radius:14px; font-size:.88rem; word-break:break-word; line-height:1.35;}
   .chat-msg.me .chat-bubble{background:linear-gradient(135deg, var(--amber-light), var(--amber)); color:var(--ink);}
   .chat-msg.system .chat-bubble{background:transparent; color:var(--cream-dim); font-size:.78rem; font-style:italic; text-align:center;}
-  .chat-input-row{display:flex; gap:8px; padding:12px; border-top:1px solid rgba(255,255,255,.1);}
+  .chat-time{font-size:.62rem; color:var(--cream-dim); opacity:.75; margin-top:3px; padding:0 3px;}
+
+  .chat-toolbar{display:flex; gap:6px; padding:8px 12px 0;}
+  .icon-btn-sm{width:32px; height:32px; border-radius:9px; background:var(--panel-glass-strong); border:1px solid var(--panel-border);
+    font-size:.95rem; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:transform .15s;}
+  .icon-btn-sm:hover{transform:scale(1.1);}
+  .icon-btn-sm.active{background:linear-gradient(135deg, var(--amber-light), var(--amber));}
+
+  .chat-input-row{display:flex; gap:8px; padding:10px 12px 12px; border-top:1px solid rgba(255,255,255,.1); position:relative;}
   .chat-input-row input{flex:1;}
+
+  .picker-popup{position:absolute; bottom:100%; left:8px; right:8px; max-height:260px; overflow-y:auto;
+    background:rgba(20,14,36,.97); backdrop-filter:blur(20px); border:1px solid var(--panel-border); border-radius:14px;
+    padding:12px; margin-bottom:8px; box-shadow:0 -8px 24px rgba(0,0,0,.4); z-index:10;}
+  .picker-section-label{font-size:.68rem; color:var(--cream-dim); font-weight:800; text-transform:uppercase; letter-spacing:.06em; margin:6px 0 8px;}
+  .picker-empty{font-size:.75rem; color:var(--cream-dim); font-style:italic; padding:4px 2px 10px;}
+  .picker-grid{display:grid; grid-template-columns:repeat(6, 1fr); gap:6px; margin-bottom:6px;}
+  .picker-cell{position:relative; aspect-ratio:1; display:flex; align-items:center; justify-content:center;}
+  .picker-emoji-btn{width:100%; height:100%; border:none; background:rgba(255,255,255,.05); border-radius:9px; font-size:1.25rem;
+    cursor:pointer; transition:transform .12s, background .12s; display:flex; align-items:center; justify-content:center;}
+  .picker-emoji-btn:hover{background:rgba(255,255,255,.14); transform:scale(1.12);}
+  .picker-fav-star{position:absolute; top:-4px; right:-4px; width:16px; height:16px; border-radius:50%; border:none;
+    background:rgba(10,8,18,.85); color:var(--cream-dim); font-size:.6rem; cursor:pointer; display:flex; align-items:center; justify-content:center;
+    line-height:1; padding:0;}
+  .picker-fav-star.active{color:var(--amber-light);}
+
+  .sticker-emoji{font-size:2.5rem; line-height:1; filter:drop-shadow(0 4px 10px rgba(0,0,0,.4));}
+  @keyframes stickerPop{0%{transform:scale(0); opacity:0;}60%{transform:scale(1.25);}100%{transform:scale(1); opacity:1;}}
+  @keyframes stickerSpin{0%{transform:scale(0) rotate(-90deg); opacity:0;}100%{transform:scale(1) rotate(0deg); opacity:1;}}
+  @keyframes stickerShake{0%{transform:scale(0); opacity:0;}50%{transform:scale(1.15) rotate(8deg);}65%{transform:scale(1.1) rotate(-8deg);}80%{transform:scale(1.05) rotate(5deg);}100%{transform:scale(1) rotate(0deg); opacity:1;}}
+  @keyframes stickerFloat{0%{transform:translateY(16px) scale(.5); opacity:0;}100%{transform:translateY(0) scale(1); opacity:1;}}
+  .sticker-anim-0{animation:stickerPop .5s cubic-bezier(.34,1.56,.64,1);}
+  .sticker-anim-1{animation:stickerSpin .5s cubic-bezier(.34,1.56,.64,1);}
+  .sticker-anim-2{animation:stickerShake .6s ease;}
+  .sticker-anim-3{animation:stickerFloat .45s cubic-bezier(.34,1.56,.64,1);}
 
   /* ---------- Win screen ---------- */
   #win-screen{position:fixed; inset:0; z-index:70; background:rgba(5,4,10,.86); display:flex; align-items:center; justify-content:center; flex-direction:column; text-align:center; overflow:hidden;}
@@ -279,7 +333,7 @@
 <body>
 
 <div class="ambient-orbs" aria-hidden="true">
-  <div class="orb orb-red"></div><div class="orb orb-yellow"></div><div class="orb orb-green"></div><div class="orb orb-blue"></div>
+  <div class="orb orb-red"></div><div class="orb orb-yellow"></div><div class="orb orb-green"></div><div class="orb orb-blue"></div><div class="orb orb-pink"></div>
 </div>
 
 <div id="toast-container"></div>
@@ -339,6 +393,11 @@
   <div class="game-main">
     <div class="game-topbar">
       <div class="topbar-brand">UNO</div>
+      <div class="topbar-score" id="topbar-score">
+        <span class="score-name" id="score-me-name">You</span><span class="score-num" id="score-me-num">0</span>
+        <span class="score-trophy">🏆</span>
+        <span class="score-num" id="score-opp-num">0</span><span class="score-name" id="score-opp-name">Opp</span>
+      </div>
       <div class="topbar-actions">
         <button id="mute-btn" class="icon-btn" aria-label="Toggle sound" title="Toggle sound">🔊</button>
       </div>
@@ -350,6 +409,7 @@
       </div>
 
       <div class="table-center">
+        <div class="energy-ring" aria-hidden="true"></div>
         <div class="piles-row">
           <div class="pile-wrap"><div id="draw-pile"></div><span class="deck-count" id="deck-count">0 left</span></div>
           <div class="pile-wrap"><div id="discard-stack"></div><span class="pile-label">Discard</span></div>
@@ -372,7 +432,23 @@
   <div id="chat-panel" class="chat-panel">
     <div class="chat-header"><span>💬 Chat</span></div>
     <div class="chat-messages" id="chat-messages"></div>
+    <div class="chat-toolbar">
+      <button id="emoji-toggle-btn" class="icon-btn-sm" title="Emoji">😀</button>
+      <button id="sticker-toggle-btn" class="icon-btn-sm" title="Stickers">🎉</button>
+    </div>
     <div class="chat-input-row">
+      <div id="emoji-picker" class="picker-popup hidden">
+        <div class="picker-section-label">Favorites</div>
+        <div class="picker-grid" id="emoji-fav-grid"></div>
+        <div class="picker-section-label">All Emoji</div>
+        <div class="picker-grid" id="emoji-all-grid"></div>
+      </div>
+      <div id="sticker-picker" class="picker-popup hidden">
+        <div class="picker-section-label">Favorites</div>
+        <div class="picker-grid" id="sticker-fav-grid"></div>
+        <div class="picker-section-label">All Stickers</div>
+        <div class="picker-grid" id="sticker-all-grid"></div>
+      </div>
       <input type="text" id="chat-input" maxlength="200" placeholder="Type a message…">
       <button id="chat-send-btn" class="btn btn-primary btn-sm">Send</button>
     </div>
@@ -410,6 +486,14 @@
    - To use real photos: paste a direct image link (ends in .jpg/.png/.webp)
      between the quotes for myAvatarUrl / friendAvatarUrl.
      Leave as '' to keep the auto-generated initial avatar.
+
+   NOTE on the win-tally & emoji/sticker favorites: these are saved with the
+   browser's localStorage, keyed to whoever is HOSTING a game (host brings
+   their saved history along and shares it with the guest for that session).
+   This works perfectly once the file is hosted for real (e.g. GitHub Pages)
+   and opened in a normal browser — that's the only way this game is meant
+   to be played. It will NOT persist if previewed directly inside a Claude
+   chat, since that sandboxed preview blocks browser storage.
    ============================================================================ */
 var CONFIG = {
   defaultMyName: 'Raj',
@@ -491,8 +575,33 @@ function getEffect(card){
 var App = {
   peer:null, conn:null, role:null,
   myName:'You', oppName:'Opponent',
-  gameState:null, lastView:null
+  gameState:null, lastView:null,
+  winTally:{}
 };
+
+/* ---------- persistence (localStorage) — works once this file is hosted for real;
+   see notes at the top of this file for how this behaves inside a Claude preview ---------- */
+function safeLoadJSON(key, fallback){
+  try{ var raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : fallback; }catch(e){ return fallback; }
+}
+function safeSaveJSON(key, value){
+  try{ localStorage.setItem(key, JSON.stringify(value)); }catch(e){}
+}
+function loadWinTally(){ return safeLoadJSON('uno_win_tally', {}); }
+function saveWinTally(tally){ safeSaveJSON('uno_win_tally', tally); }
+function incrementWinTally(player){
+  var name = player==='host' ? App.myName : App.oppName;
+  App.winTally[name] = (App.winTally[name]||0) + 1;
+  saveWinTally(App.winTally);
+}
+function loadFavorites(key){ return safeLoadJSON(key, []); }
+function saveFavorites(key, arr){ safeSaveJSON(key, arr); }
+function toggleFavorite(key, item){
+  var favs = loadFavorites(key);
+  var idx = favs.indexOf(item);
+  if(idx>=0) favs.splice(idx,1); else favs.push(item);
+  saveFavorites(key, favs);
+}
 
 function avatarUrlForName(name){
   if(name===CONFIG.defaultMyName && CONFIG.myAvatarUrl) return CONFIG.myAvatarUrl;
@@ -633,6 +742,7 @@ function send(msg){ if(App.conn && App.conn.open) App.conn.send(msg); }
 
 function handleMessage(msg){
   if(msg.t==='chat'){ appendChatMessage(msg.from, msg.text, false); return; }
+  if(msg.t==='sticker'){ appendStickerMessage(msg.from, msg.sticker, false); return; }
 
   if(App.role==='host'){
     if(msg.t==='join'){
@@ -648,6 +758,7 @@ function handleMessage(msg){
       document.getElementById('opp-name').textContent = App.oppName;
     } else if(msg.t==='state'){
       App.gameState = msg.view;
+      if(msg.winTally) App.winTally = msg.winTally;
       enterGameScreen();
       renderGuest();
       if(msg.view.winner) showWinScreen(msg.view.winner==='guest');
@@ -714,7 +825,7 @@ function stateForGuest(s){
 
 function broadcastAndRenderHost(){
   var s = App.gameState;
-  send({t:'state', view: stateForGuest(s)});
+  send({t:'state', view: stateForGuest(s), winTally: App.winTally});
   renderHost();
   if(s.winner) showWinScreen(s.winner==='host');
 }
@@ -794,6 +905,7 @@ function hostHandleAction(player, msg){
 
     if(hand2.length===0){
       s.winner = player;
+      incrementWinTally(player);
       broadcastAndRenderHost();
       return;
     }
@@ -925,6 +1037,12 @@ function renderAvatar(containerId, name){
   if(url){ var img = el('img','avatar-img'); img.src=url; img.alt=name; container.appendChild(img); }
   else { var initial = el('div','avatar-initial'); initial.textContent = (name||'?').trim().charAt(0).toUpperCase(); container.appendChild(initial); }
 }
+function updateScoreboard(){
+  document.getElementById('score-me-name').textContent = App.myName;
+  document.getElementById('score-opp-name').textContent = App.oppName;
+  document.getElementById('score-me-num').textContent = String(App.winTally[App.myName]||0);
+  document.getElementById('score-opp-num').textContent = String(App.winTally[App.oppName]||0);
+}
 
 function playSoundsForTransition(prev, view, myRole){
   if(!prev) return;
@@ -943,6 +1061,7 @@ function renderCommon(view, myRole){
   document.getElementById('opp-name').textContent = App.oppName;
   renderAvatar('me-avatar', App.myName);
   renderAvatar('opp-avatar', App.oppName);
+  updateScoreboard();
 
   playSoundsForTransition(App.lastView, view, myRole);
   App.lastView = view;
@@ -1017,7 +1136,9 @@ function showWinScreen(iWon){
   var sub = document.getElementById('win-sub');
   title.textContent = iWon ? 'You Won! 🎉' : (App.oppName+' Won');
   title.className = iWon ? 'won' : 'lost';
-  sub.textContent = iWon ? 'Nicely played.' : 'Better luck on the next round.';
+  var myScore = App.winTally[App.myName]||0, oppScore = App.winTally[App.oppName]||0;
+  sub.textContent = (iWon ? 'Nicely played.' : 'Better luck on the next round.') +
+    '  Overall: '+App.myName+' '+myScore+' – '+oppScore+' '+App.oppName;
   screen.classList.remove('hidden');
   spawnConfetti(screen, iWon);
 }
@@ -1040,12 +1161,20 @@ function spawnConfetti(container, celebratory){
 /* ============================================================================
    CHAT
    ============================================================================ */
+function formatTime(){
+  var d = new Date();
+  var h = d.getHours(), m = d.getMinutes();
+  var ampm = h>=12 ? 'PM' : 'AM';
+  h = h%12; if(h===0) h=12;
+  return h+':'+(m<10?'0':'')+m+' '+ampm;
+}
 function appendChatMessage(from, text, isMe){
   var list = document.getElementById('chat-messages');
   var row = el('div', 'chat-msg'+(isMe?' me':''));
   var author = el('div','chat-author'); author.textContent = from;
   var bubble = el('div','chat-bubble'); bubble.textContent = text;
-  row.appendChild(author); row.appendChild(bubble);
+  var time = el('div','chat-time'); time.textContent = formatTime();
+  row.appendChild(author); row.appendChild(bubble); row.appendChild(time);
   list.appendChild(row);
   list.scrollTop = list.scrollHeight;
 }
@@ -1056,6 +1185,78 @@ function sendChat(){
   input.value='';
   appendChatMessage(App.myName, text, true);
   send({t:'chat', from:App.myName, text:text});
+}
+
+/* ---------- Emoji + sticker reactions ---------- */
+var EMOJI_LIST = ['😀','😂','🤣','😊','😍','🥰','😘','😜','🤔','😐','😴','🤯',
+  '😱','😭','😢','😡','🥳','😎','🤩','🥺','👍','👎','👏','🙌','🤝','👋','✌️','🤞',
+  '🙏','💪','❤️','💛','💚','💙','💜','🖤','🤍','💔','💯','🔥','⭐','✨','🎉','🎊','🏆','🃏'];
+
+var STICKER_LIST = ['🎉','😂','🔥','👏','😱','❤️','👍','😴','🏆','💥','🤯','🙌'];
+
+function seededAnimClass(item){
+  var sum = 0; for(var i=0;i<item.length;i++) sum += item.charCodeAt(i);
+  return 'sticker-anim-'+(sum%4);
+}
+
+function appendStickerMessage(from, sticker, isMe){
+  var list = document.getElementById('chat-messages');
+  var row = el('div', 'chat-msg sticker-msg'+(isMe?' me':''));
+  var author = el('div','chat-author'); author.textContent = from;
+  var big = el('div', 'sticker-emoji '+seededAnimClass(sticker)); big.textContent = sticker;
+  var time = el('div','chat-time'); time.textContent = formatTime();
+  row.appendChild(author); row.appendChild(big); row.appendChild(time);
+  list.appendChild(row);
+  list.scrollTop = list.scrollHeight;
+}
+function sendSticker(sticker){
+  appendStickerMessage(App.myName, sticker, true);
+  send({t:'sticker', from:App.myName, sticker:sticker});
+  closeAllPickers();
+}
+function insertEmoji(emoji){
+  var input = document.getElementById('chat-input');
+  input.value += emoji;
+  input.focus();
+  closeAllPickers();
+}
+function closeAllPickers(){
+  document.getElementById('emoji-picker').classList.add('hidden');
+  document.getElementById('sticker-picker').classList.add('hidden');
+}
+function renderPickerGrid(containerId, items, favKey, onPick){
+  var container = document.getElementById(containerId);
+  container.innerHTML='';
+  var favs = loadFavorites(favKey);
+  items.forEach(function(item){
+    var cell = el('div','picker-cell');
+    var btn = el('button','picker-emoji-btn'); btn.type='button'; btn.textContent=item;
+    btn.addEventListener('click', function(){ onPick(item); });
+    var isFav = favs.indexOf(item)>=0;
+    var star = el('button','picker-fav-star'+(isFav?' active':'')); star.type='button'; star.textContent = isFav?'★':'☆';
+    star.setAttribute('aria-label','Favorite');
+    star.addEventListener('click', function(ev){
+      ev.stopPropagation();
+      toggleFavorite(favKey, item);
+      renderEmojiPicker(); renderStickerPicker();
+    });
+    cell.appendChild(btn); cell.appendChild(star);
+    container.appendChild(cell);
+  });
+}
+function renderFavSection(gridId, favKey, allOnPick){
+  var favs = loadFavorites(favKey);
+  var container = document.getElementById(gridId);
+  if(favs.length===0){ container.innerHTML = '<div class="picker-empty">Tap ☆ on any item to add favorites</div>'; return; }
+  renderPickerGrid(gridId, favs, favKey, allOnPick);
+}
+function renderEmojiPicker(){
+  renderFavSection('emoji-fav-grid', 'uno_fav_emoji', insertEmoji);
+  renderPickerGrid('emoji-all-grid', EMOJI_LIST, 'uno_fav_emoji', insertEmoji);
+}
+function renderStickerPicker(){
+  renderFavSection('sticker-fav-grid', 'uno_fav_sticker', sendSticker);
+  renderPickerGrid('sticker-all-grid', STICKER_LIST, 'uno_fav_sticker', sendSticker);
 }
 
 /* ============================================================================
@@ -1077,6 +1278,7 @@ function buildHeroFan(){
 
 document.addEventListener('DOMContentLoaded', function(){
   buildHeroFan();
+  App.winTally = loadWinTally();
   document.getElementById('name-input').value = CONFIG.defaultMyName;
   document.getElementById('autojoin-name-input').value = CONFIG.defaultFriendName;
 
@@ -1127,6 +1329,26 @@ document.addEventListener('DOMContentLoaded', function(){
   document.getElementById('mute-btn').addEventListener('click', toggleMute);
   document.getElementById('chat-send-btn').addEventListener('click', sendChat);
   document.getElementById('chat-input').addEventListener('keydown', function(ev){ if(ev.key==='Enter') sendChat(); });
+
+  renderEmojiPicker();
+  renderStickerPicker();
+  document.getElementById('emoji-toggle-btn').addEventListener('click', function(ev){
+    ev.stopPropagation();
+    var picker = document.getElementById('emoji-picker');
+    var opening = picker.classList.contains('hidden');
+    closeAllPickers();
+    if(opening){ picker.classList.remove('hidden'); }
+  });
+  document.getElementById('sticker-toggle-btn').addEventListener('click', function(ev){
+    ev.stopPropagation();
+    var picker = document.getElementById('sticker-picker');
+    var opening = picker.classList.contains('hidden');
+    closeAllPickers();
+    if(opening){ picker.classList.remove('hidden'); }
+  });
+  document.getElementById('emoji-picker').addEventListener('click', function(ev){ ev.stopPropagation(); });
+  document.getElementById('sticker-picker').addEventListener('click', function(ev){ ev.stopPropagation(); });
+  document.addEventListener('click', closeAllPickers);
 
   var params = new URLSearchParams(location.search);
   var roomParam = params.get('room');
