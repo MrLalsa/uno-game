@@ -42,6 +42,10 @@
     overflow-x:hidden;
     position:relative;
   }
+  body::after{
+    content:''; position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.035;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
   h1,h2,h3{font-family:'Lilita One', cursive; font-weight:400; letter-spacing:.5px; margin:0;}
   button{font-family:inherit;}
   ::selection{background:var(--amber); color:var(--ink);}
@@ -59,6 +63,15 @@
   @keyframes floatA{0%,100%{transform:translate(0,0);}50%{transform:translate(34px,22px);}}
   @keyframes floatB{0%,100%{transform:translate(0,0);}50%{transform:translate(-28px,26px);}}
   @keyframes floatC{0%,100%{transform:translate(0,0);}50%{transform:translate(22px,-26px);}}
+
+  .particles{position:fixed; inset:0; overflow:hidden; z-index:0; pointer-events:none;}
+  .particle{position:absolute; border-radius:50%; opacity:0; animation:particleDrift linear infinite;}
+  @keyframes particleDrift{
+    0%{opacity:0; transform:translateY(0) scale(.6);}
+    12%{opacity:.6;}
+    88%{opacity:.35;}
+    100%{opacity:0; transform:translateY(-140px) scale(1);}
+  }
 
   .screen{
     min-height:100vh; min-height:100dvh;
@@ -108,8 +121,14 @@
   .hero-fan .hand-slot:nth-child(3) .card{animation-delay:.5s;}
   .hero-fan .hand-slot:nth-child(4) .card{animation-delay:.75s;}
   .hero-fan .hand-slot:nth-child(5) .card{animation-delay:1s;}
-  #lobby-title{font-size:3.6rem; color:var(--amber-light); text-shadow:0 4px 0 rgba(0,0,0,.4), 0 0 44px rgba(244,180,0,.4); margin-bottom:4px;}
+  #lobby-title{font-size:3.6rem; margin-bottom:4px; color:var(--amber-light); text-shadow:0 4px 0 rgba(0,0,0,.4), 0 0 44px rgba(244,180,0,.4);
+    background:linear-gradient(110deg, var(--amber-light) 30%, #fff 45%, var(--amber-light) 60%); background-size:220% 100%;
+    -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+    animation:titleShimmer 3.5s ease-in-out infinite;}
+  @keyframes titleShimmer{0%{background-position:220% 0;}100%{background-position:-220% 0;}}
   #lobby-tagline{color:var(--cream-dim); margin-bottom:26px; font-weight:600;}
+  #password-title{font-size:2.1rem; color:var(--amber-light); text-shadow:0 3px 0 rgba(0,0,0,.4), 0 0 30px rgba(244,180,0,.35); margin-bottom:4px;}
+  #password-tagline{color:var(--cream-dim); margin-bottom:22px; font-weight:600; font-size:.9rem;}
   .lobby-field{margin-bottom:18px; text-align:left;}
   .lobby-field label{display:block; margin-bottom:6px;}
   .lobby-choice-row{display:flex; gap:14px; justify-content:center; flex-wrap:wrap;}
@@ -157,6 +176,11 @@
   .player-row{width:100%; display:flex; flex-direction:column; align-items:center; padding:8px 0;}
   .player-label{display:flex; align-items:center; gap:10px; font-weight:800; color:var(--cream-dim); margin-bottom:8px; font-size:.95rem;}
   .player-row.active .player-label{color:var(--amber-light);}
+  .conn-status{font-size:.68rem; color:var(--red-light); font-weight:800; text-transform:uppercase; letter-spacing:.03em;}
+  .reconnect-banner{position:absolute; top:64px; left:50%; transform:translateX(-50%); z-index:41;
+    display:flex; align-items:center; gap:10px; background:rgba(227,27,35,.16); border:1px solid rgba(227,27,35,.4);
+    color:var(--cream); padding:8px 14px; border-radius:999px; font-size:.85rem; font-weight:700; backdrop-filter:blur(10px);
+    animation:toastIn .25s ease;}
   .opp-fan, .hand-fan{position:relative; height:120px; width:100%; max-width:560px;}
   .hand-fan{height:150px;}
 
@@ -232,6 +256,12 @@
   .card.landing{animation:cardLand .32s cubic-bezier(.34,1.56,.64,1);}
   @keyframes drawPop{0%{transform:translateY(0) scale(1);}40%{transform:translateY(-16px) scale(1.06);}100%{transform:translateY(0) scale(1);}}
   .card.drawing{animation:drawPop .35s ease;}
+  .burst-particle{position:absolute; top:50%; left:50%; width:6px; height:6px; border-radius:50%;
+    animation:burstOut .5s ease-out forwards; z-index:6; pointer-events:none;}
+  @keyframes burstOut{
+    0%{transform:translate(-50%,-50%) translate(0,0); opacity:1;}
+    100%{transform:translate(-50%,-50%) translate(var(--bx),var(--by)); opacity:0;}
+  }
 
   /* ---------- Modal ---------- */
   .modal-overlay{position:fixed; inset:0; background:rgba(6,4,14,.72); backdrop-filter:blur(3px); display:flex; align-items:center; justify-content:center; z-index:50; padding:20px;}
@@ -275,22 +305,56 @@
   .chat-input-row{display:flex; gap:8px; padding:10px 12px 12px; border-top:1px solid rgba(255,255,255,.1); position:relative;}
   .chat-input-row input{flex:1;}
 
-  .picker-popup{position:absolute; bottom:100%; left:8px; right:8px; max-height:260px; overflow-y:auto;
-    background:rgba(20,14,36,.97); backdrop-filter:blur(20px); border:1px solid var(--panel-border); border-radius:14px;
-    padding:12px; margin-bottom:8px; box-shadow:0 -8px 24px rgba(0,0,0,.4); z-index:10;}
-  .picker-section-label{font-size:.68rem; color:var(--cream-dim); font-weight:800; text-transform:uppercase; letter-spacing:.06em; margin:6px 0 8px;}
-  .picker-empty{font-size:.75rem; color:var(--cream-dim); font-style:italic; padding:4px 2px 10px;}
-  .picker-grid{display:grid; grid-template-columns:repeat(6, 1fr); gap:6px; margin-bottom:6px;}
+  /* subtle, thin, cross-browser scrollbars instead of chunky OS-default ones */
+  .picker-popup, .chat-messages, .picker-tab-content{
+    scrollbar-width:thin; scrollbar-color:rgba(255,255,255,.25) transparent;
+  }
+  .picker-popup::-webkit-scrollbar, .chat-messages::-webkit-scrollbar, .picker-tab-content::-webkit-scrollbar{width:6px; height:6px;}
+  .picker-popup::-webkit-scrollbar-track, .chat-messages::-webkit-scrollbar-track, .picker-tab-content::-webkit-scrollbar-track{background:transparent;}
+  .picker-popup::-webkit-scrollbar-thumb, .chat-messages::-webkit-scrollbar-thumb, .picker-tab-content::-webkit-scrollbar-thumb{
+    background:rgba(255,255,255,.22); border-radius:999px;}
+  .picker-popup::-webkit-scrollbar-thumb:hover, .chat-messages::-webkit-scrollbar-thumb:hover, .picker-tab-content::-webkit-scrollbar-thumb:hover{
+    background:rgba(255,255,255,.38);}
+
+  .picker-popup{position:absolute; bottom:100%; left:8px; right:8px; max-height:320px; overflow:hidden; display:flex; flex-direction:column;
+    background:rgba(18,13,32,.98); backdrop-filter:blur(20px); border:1px solid var(--panel-border); border-radius:14px;
+    margin-bottom:8px; box-shadow:0 -8px 24px rgba(0,0,0,.45); z-index:10;}
+  .picker-tabs-header{display:flex; align-items:center; justify-content:space-between; padding:8px 8px 8px 10px;
+    border-bottom:1px solid rgba(255,255,255,.08); flex-shrink:0;}
+  .picker-tabs{display:flex; gap:4px;}
+  .picker-tab{background:transparent; border:none; color:var(--cream-dim); font-size:.78rem; font-weight:800; padding:6px 10px;
+    border-radius:8px; cursor:pointer; transition:all .15s;}
+  .picker-tab:hover{background:rgba(255,255,255,.06); color:var(--cream);}
+  .picker-tab.active{background:linear-gradient(135deg, var(--amber-light), var(--amber)); color:var(--ink);}
+  .picker-close-btn{width:26px; height:26px; border-radius:50%; border:none; background:rgba(255,255,255,.08); color:var(--cream-dim);
+    font-size:.75rem; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .15s;}
+  .picker-close-btn:hover{background:rgba(227,27,35,.3); color:#fff;}
+  .picker-tab-content{padding:10px 12px 12px; overflow-y:auto; max-height:270px;}
+
+  .picker-section-label{font-size:.68rem; color:var(--cream-dim); font-weight:800; text-transform:uppercase; letter-spacing:.06em; margin:2px 0 8px;}
+  .picker-empty{font-size:.72rem; color:var(--cream-dim); opacity:.6; padding:2px 2px 8px;}
+  .picker-grid{display:grid; grid-template-columns:repeat(6, 1fr); gap:6px; margin-bottom:10px;}
   .picker-cell{position:relative; aspect-ratio:1; display:flex; align-items:center; justify-content:center;}
   .picker-emoji-btn{width:100%; height:100%; border:none; background:rgba(255,255,255,.05); border-radius:9px; font-size:1.25rem;
     cursor:pointer; transition:transform .12s, background .12s; display:flex; align-items:center; justify-content:center;}
   .picker-emoji-btn:hover{background:rgba(255,255,255,.14); transform:scale(1.12);}
   .picker-fav-star{position:absolute; top:-4px; right:-4px; width:16px; height:16px; border-radius:50%; border:none;
-    background:rgba(10,8,18,.85); color:var(--cream-dim); font-size:.6rem; cursor:pointer; display:flex; align-items:center; justify-content:center;
-    line-height:1; padding:0;}
+    background:rgba(10,8,18,.9); color:var(--cream-dim); font-size:.6rem; cursor:pointer; display:flex; align-items:center; justify-content:center;
+    line-height:1; padding:0; z-index:2;}
   .picker-fav-star.active{color:var(--amber-light);}
 
+  /* GIF tab */
+  .gif-search{width:100%; margin-bottom:10px; padding:9px 12px; font-size:.85rem;}
+  .gif-grid{display:grid; grid-template-columns:repeat(2, 1fr); gap:8px;}
+  .gif-cell{position:relative; border-radius:10px; overflow:hidden; aspect-ratio:1.4; background:rgba(255,255,255,.04); cursor:pointer;}
+  .gif-thumb{width:100%; height:100%; object-fit:cover; display:block; transition:transform .15s;}
+  .gif-cell:hover .gif-thumb{transform:scale(1.06);}
+  .gif-cell .picker-fav-star{top:4px; right:4px;}
+  .gif-key-hint{font-size:.74rem; color:var(--cream-dim); line-height:1.5; padding:6px 2px;}
+  .gif-key-hint a{color:var(--amber-light);}
+
   .sticker-emoji{font-size:2.5rem; line-height:1; filter:drop-shadow(0 4px 10px rgba(0,0,0,.4));}
+  .sticker-gif-img{max-width:180px; border-radius:12px; display:block; box-shadow:0 6px 18px rgba(0,0,0,.4);}
   @keyframes stickerPop{0%{transform:scale(0); opacity:0;}60%{transform:scale(1.25);}100%{transform:scale(1); opacity:1;}}
   @keyframes stickerSpin{0%{transform:scale(0) rotate(-90deg); opacity:0;}100%{transform:scale(1) rotate(0deg); opacity:1;}}
   @keyframes stickerShake{0%{transform:scale(0); opacity:0;}50%{transform:scale(1.15) rotate(8deg);}65%{transform:scale(1.1) rotate(-8deg);}80%{transform:scale(1.05) rotate(5deg);}100%{transform:scale(1) rotate(0deg); opacity:1;}}
@@ -299,6 +363,9 @@
   .sticker-anim-1{animation:stickerSpin .5s cubic-bezier(.34,1.56,.64,1);}
   .sticker-anim-2{animation:stickerShake .6s ease;}
   .sticker-anim-3{animation:stickerFloat .45s cubic-bezier(.34,1.56,.64,1);}
+
+  /* emoji-only chat messages render bare and large, WhatsApp-style — no bubble background */
+  .chat-msg.emoji-only .chat-bubble{background:transparent; padding:2px 0; font-size:2.1rem; line-height:1.1;}
 
   /* ---------- Win screen ---------- */
   #win-screen{position:fixed; inset:0; z-index:70; background:rgba(5,4,10,.86); display:flex; align-items:center; justify-content:center; flex-direction:column; text-align:center; overflow:hidden;}
@@ -335,11 +402,29 @@
 <div class="ambient-orbs" aria-hidden="true">
   <div class="orb orb-red"></div><div class="orb orb-yellow"></div><div class="orb orb-green"></div><div class="orb orb-blue"></div><div class="orb orb-pink"></div>
 </div>
+<div class="particles" id="particles" aria-hidden="true"></div>
 
 <div id="toast-container"></div>
 
 <!-- LOBBY -->
-<div id="lobby-screen" class="screen">
+<!-- PASSWORD GATE -->
+<div id="password-screen" class="screen hidden">
+  <div class="lobby-inner">
+    <div class="lobby-card glass">
+      <div class="hero-fan" id="password-hero-fan"></div>
+      <h1 id="password-title">🔒 Private Game</h1>
+      <p id="password-tagline">This link is password protected. Enter it to continue.</p>
+      <div class="lobby-field">
+        <label for="password-input">Password</label>
+        <input type="password" id="password-input" placeholder="••••••••">
+      </div>
+      <button class="btn btn-primary" id="password-submit-btn" style="width:100%;">Enter</button>
+      <div class="error-text" id="password-error"></div>
+    </div>
+  </div>
+</div>
+
+<div id="lobby-screen" class="screen hidden">
   <div class="lobby-inner">
     <div class="lobby-card glass">
       <div class="hero-fan" id="hero-fan"></div>
@@ -404,7 +489,7 @@
     </div>
     <div class="board">
       <div class="player-row" id="opp-row">
-        <div class="player-label"><div class="avatar" id="opp-avatar"></div><span id="opp-name">Opponent</span></div>
+        <div class="player-label"><div class="avatar" id="opp-avatar"></div><span id="opp-name">Opponent</span><span id="opp-status" class="conn-status hidden">(disconnected)</span></div>
         <div class="opp-fan" id="opp-fan"></div>
       </div>
 
@@ -426,6 +511,10 @@
         </div>
       </div>
     </div>
+    <div id="reconnect-banner" class="reconnect-banner hidden">
+      <span>Connection lost.</span>
+      <button id="reconnect-btn" class="btn btn-primary btn-sm">Reconnect</button>
+    </div>
   </div>
 
   <!-- CHAT — always open, docked alongside the board -->
@@ -433,21 +522,24 @@
     <div class="chat-header"><span>💬 Chat</span></div>
     <div class="chat-messages" id="chat-messages"></div>
     <div class="chat-toolbar">
-      <button id="emoji-toggle-btn" class="icon-btn-sm" title="Emoji">😀</button>
-      <button id="sticker-toggle-btn" class="icon-btn-sm" title="Stickers">🎉</button>
+      <button id="reaction-toggle-btn" class="icon-btn-sm" title="Emoji &amp; GIFs">😀</button>
     </div>
     <div class="chat-input-row">
-      <div id="emoji-picker" class="picker-popup hidden">
-        <div class="picker-section-label">Favorites</div>
-        <div class="picker-grid" id="emoji-fav-grid"></div>
-        <div class="picker-section-label">All Emoji</div>
-        <div class="picker-grid" id="emoji-all-grid"></div>
-      </div>
-      <div id="sticker-picker" class="picker-popup hidden">
-        <div class="picker-section-label">Favorites</div>
-        <div class="picker-grid" id="sticker-fav-grid"></div>
-        <div class="picker-section-label">All Stickers</div>
-        <div class="picker-grid" id="sticker-all-grid"></div>
+      <div id="reaction-picker" class="picker-popup hidden">
+        <div class="picker-tabs-header">
+          <div class="picker-tabs">
+            <button class="picker-tab active" id="tab-btn-emoji" data-tab="emoji" type="button">😀 Emoji</button>
+            <button class="picker-tab" id="tab-btn-gif" data-tab="gif" type="button">🎬 GIFs</button>
+          </div>
+          <button id="picker-close-btn" class="picker-close-btn" aria-label="Close" type="button">✕</button>
+        </div>
+        <div class="picker-tab-content" id="tab-content-emoji">
+          <div class="picker-section-label hidden" id="emoji-fav-label">Favorites</div>
+          <div class="picker-grid" id="emoji-fav-grid"></div>
+          <div class="picker-section-label">All Emoji</div>
+          <div class="picker-grid" id="emoji-all-grid"></div>
+        </div>
+        <div class="picker-tab-content hidden" id="tab-content-gif"></div>
       </div>
       <input type="text" id="chat-input" maxlength="200" placeholder="Type a message…">
       <button id="chat-send-btn" class="btn btn-primary btn-sm">Send</button>
@@ -487,6 +579,21 @@
      between the quotes for myAvatarUrl / friendAvatarUrl.
      Leave as '' to keep the auto-generated initial avatar.
 
+   - accessPassword: set any word/phrase here and visitors must type it
+     before the lobby even appears. Leave as '' for no password.
+     HONESTY NOTE: this is a casual gate, not real security — this file's
+     full source (including this password) is visible to anyone who views
+     page-source on the published site, same as any static webpage. It will
+     stop a random person who stumbles on the link, but not someone who
+     deliberately inspects the code. GitHub Pages on a free account also
+     REQUIRES the repo to stay Public for the link to work at all — making
+     the repo private breaks Pages entirely on the free plan.
+
+   - giphyApiKey: for the GIF picker to show REAL trending/searchable GIFs
+     instead of just the emoji-sticker fallback, get a free key (2 minutes,
+     no card needed) at developers.giphy.com → Create an App → copy the key
+     here. Leave as '' and the GIF tab will just show the sticker reactions.
+
    NOTE on the win-tally & emoji/sticker favorites: these are saved with the
    browser's localStorage, keyed to whoever is HOSTING a game (host brings
    their saved history along and shares it with the guest for that session).
@@ -499,7 +606,9 @@ var CONFIG = {
   defaultMyName: 'Raj',
   defaultFriendName: 'Zoya',
   myAvatarUrl: '',      // e.g. 'https://i.imgur.com/yourphoto.jpg'
-  friendAvatarUrl: ''   // e.g. 'https://i.imgur.com/herphoto.jpg'
+  friendAvatarUrl: '',  // e.g. 'https://i.imgur.com/herphoto.jpg'
+  accessPassword: '',   // e.g. 'zoyaraj' — leave '' for no password
+  giphyApiKey: ''       // paste your free key from developers.giphy.com
 };
 
 var COLORS = ['red','yellow','green','blue'];
@@ -576,7 +685,8 @@ var App = {
   peer:null, conn:null, role:null,
   myName:'You', oppName:'Opponent',
   gameState:null, lastView:null,
-  winTally:{}
+  winTally:{},
+  lastRoomCode:null, oppDisconnected:false
 };
 
 /* ---------- persistence (localStorage) — works once this file is hosted for real;
@@ -686,6 +796,7 @@ function toggleMute(){
 function startHosting(){
   var code = makeRoomCode();
   App.role='host';
+  if(App.peer && !App.peer.destroyed){ try{ App.peer.destroy(); }catch(e){} }
   App.peer = new Peer('uno-'+code, {debug:0});
 
   App.peer.on('open', function(){
@@ -693,8 +804,9 @@ function startHosting(){
     show('lobby-hosting-panel'); hide('lobby-start');
   });
   App.peer.on('connection', function(conn){
-    App.conn = conn; wireConnection(conn);
-    conn.on('open', function(){ document.getElementById('hosting-status').textContent = 'Connected! Starting game…'; });
+    conn.on('data', function(msg){ handleHostIncomingConnection(conn, msg); });
+    conn.on('close', function(){ if(conn===App.conn) handleDisconnect(); });
+    conn.on('error', function(e){ console.error(e); });
   });
   App.peer.on('error', function(err){
     console.error(err);
@@ -703,16 +815,57 @@ function startHosting(){
   });
 }
 
+/* Host-side gatekeeper: a connection is only ever promoted to the active App.conn
+   if it's the very first join, or a reconnect whose name matches the current
+   opponent. Anyone else pinging the room while a game is live gets turned away
+   without touching the real game or the real connection. */
+function handleHostIncomingConnection(conn, msg){
+  if(msg.t==='chat'){ if(conn===App.conn) appendChatMessage(msg.from, msg.text, false); return; }
+  if(msg.t==='sticker'){ if(conn===App.conn) appendStickerMessage(msg.from, msg.kind, msg.value, false); return; }
+  if(msg.t==='move'){ if(conn===App.conn) hostHandleAction('guest', msg); return; }
+
+  if(msg.t==='join'){
+    var name = msg.name || 'Player';
+    var gameInProgress = !!(App.gameState && !App.gameState.winner);
+    var isReconnect = gameInProgress && App.oppName === name;
+
+    if(gameInProgress && !isReconnect){
+      conn.send({t:'toast', msg:'A game is already in progress on this link.'});
+      setTimeout(function(){ try{ conn.close(); }catch(e){} }, 400);
+      return;
+    }
+
+    App.conn = conn;
+    App.oppName = name;
+    document.getElementById('opp-name').textContent = App.oppName;
+
+    if(isReconnect){
+      clearDisconnectedUI();
+      showToast(App.oppName+' reconnected!');
+      broadcastAndRenderHost();
+    } else {
+      document.getElementById('hosting-status').textContent = 'Connected! Starting game…';
+      beginGame();
+    }
+  }
+}
+
 function startJoining(code){
   code = normalizeCode(code);
   if(!code){ return showFieldError(activeErrorField(), 'That doesn\u2019t look like a valid code or link.'); }
+  App.lastRoomCode = code;
   App.role='guest';
+  if(App.peer && !App.peer.destroyed){ try{ App.peer.destroy(); }catch(e){} }
   App.peer = new Peer(undefined, {debug:0});
 
   App.peer.on('open', function(){
     var conn = App.peer.connect('uno-'+code, {reliable:true});
     App.conn = conn; wireConnection(conn);
-    conn.on('open', function(){ conn.send({t:'join', name:App.myName}); });
+    conn.on('open', function(){
+      conn.send({t:'join', name:App.myName});
+      if(App.oppDisconnected){ clearDisconnectedUI(); showToast('Reconnected!'); }
+      hide('reconnect-banner');
+    });
   });
   App.peer.on('error', function(err){
     console.error(err);
@@ -735,36 +888,45 @@ function activeErrorField(){
 
 function wireConnection(conn){
   conn.on('data', function(msg){ handleMessage(msg); });
-  conn.on('close', function(){ showToast('Connection with your friend was lost.'); });
+  conn.on('close', function(){ if(conn===App.conn) handleDisconnect(); });
   conn.on('error', function(e){ console.error(e); showToast('A connection error occurred.'); });
 }
 function send(msg){ if(App.conn && App.conn.open) App.conn.send(msg); }
 
+function handleDisconnect(){
+  App.oppDisconnected = true;
+  var statusEl = document.getElementById('opp-status');
+  statusEl.textContent = '(disconnected)';
+  statusEl.classList.remove('hidden');
+  showToast(App.oppName+' disconnected.');
+  if(App.role==='guest'){ show('reconnect-banner'); }
+}
+function clearDisconnectedUI(){
+  App.oppDisconnected = false;
+  document.getElementById('opp-status').classList.add('hidden');
+  hide('reconnect-banner');
+}
+function attemptReconnect(){
+  if(!App.lastRoomCode){ showToast('No saved room to reconnect to.'); return; }
+  showToast('Reconnecting…');
+  startJoining(App.lastRoomCode);
+}
+
 function handleMessage(msg){
   if(msg.t==='chat'){ appendChatMessage(msg.from, msg.text, false); return; }
-  if(msg.t==='sticker'){ appendStickerMessage(msg.from, msg.sticker, false); return; }
+  if(msg.t==='sticker'){ appendStickerMessage(msg.from, msg.kind, msg.value, false); return; }
 
-  if(App.role==='host'){
-    if(msg.t==='join'){
-      App.oppName = msg.name || 'Player';
-      document.getElementById('opp-name').textContent = App.oppName;
-      beginGame();
-    } else if(msg.t==='move'){
-      hostHandleAction('guest', msg);
-    }
-  } else {
-    if(msg.t==='welcome'){
-      App.oppName = msg.hostName;
-      document.getElementById('opp-name').textContent = App.oppName;
-    } else if(msg.t==='state'){
-      App.gameState = msg.view;
-      if(msg.winTally) App.winTally = msg.winTally;
-      enterGameScreen();
-      renderGuest();
-      if(msg.view.winner) showWinScreen(msg.view.winner==='guest');
-    } else if(msg.t==='toast'){
-      showToast(msg.msg);
-    }
+  if(msg.t==='welcome'){
+    App.oppName = msg.hostName;
+    document.getElementById('opp-name').textContent = App.oppName;
+  } else if(msg.t==='state'){
+    App.gameState = msg.view;
+    if(msg.winTally) App.winTally = msg.winTally;
+    enterGameScreen();
+    renderGuest();
+    if(msg.view.winner) showWinScreen(msg.view.winner==='guest');
+  } else if(msg.t==='toast'){
+    showToast(msg.msg);
   }
 }
 
@@ -996,6 +1158,22 @@ function renderDiscard(cards){
     wrap.appendChild(cardEl);
   });
 }
+function spawnCardBurst(color){
+  var wrap = document.getElementById('discard-stack');
+  if(!wrap) return;
+  var colorHex = {red:'#ff5c6c', yellow:'#ffd966', green:'#5fcb82', blue:'#4fa3e3', wild:'#e0a0f0'}[color] || '#ffd966';
+  for(var i=0;i<10;i++){
+    var p = el('div','burst-particle');
+    var angle = (Math.PI*2*i/10) + Math.random()*0.4;
+    var dist = 28+Math.random()*22;
+    p.style.background = colorHex;
+    p.style.boxShadow = '0 0 6px '+colorHex;
+    p.style.setProperty('--bx', Math.cos(angle)*dist+'px');
+    p.style.setProperty('--by', Math.sin(angle)*dist+'px');
+    wrap.appendChild(p);
+    (function(node){ setTimeout(function(){ if(node.parentNode) node.parentNode.removeChild(node); }, 520); })(p);
+  }
+}
 
 function renderDrawPile(count, canDraw){
   var wrap = document.getElementById('draw-pile');
@@ -1044,12 +1222,12 @@ function updateScoreboard(){
   document.getElementById('score-opp-num').textContent = String(App.winTally[App.oppName]||0);
 }
 
-function playSoundsForTransition(prev, view, myRole){
+function playReactionsForTransition(prev, view, myRole){
   if(!prev) return;
-  if(view.discardTop && prev.discardTop && view.discardTop.id !== prev.discardTop.id) sfxCardPlay();
+  var discardChanged = view.discardTop && prev.discardTop && view.discardTop.id !== prev.discardTop.id;
+  if(discardChanged){ sfxCardPlay(); spawnCardBurst(view.discardTop.color); }
   var myPrevCount = prev.myHand.length, myNowCount = view.myHand.length;
   var oppPrevCount = prev.oppCount, oppNowCount = view.oppCount;
-  var discardChanged = view.discardTop && prev.discardTop && view.discardTop.id !== prev.discardTop.id;
   if(!discardChanged && (myNowCount>myPrevCount || oppNowCount>oppPrevCount)) sfxDraw();
   var wasMyTurn = prev.turn===myRole, isMyTurnNow = view.turn===myRole;
   if(!wasMyTurn && isMyTurnNow && !view.winner) sfxTurnChime();
@@ -1063,15 +1241,15 @@ function renderCommon(view, myRole){
   renderAvatar('opp-avatar', App.oppName);
   updateScoreboard();
 
-  playSoundsForTransition(App.lastView, view, myRole);
-  App.lastView = view;
-
   var isMyTurn = view.turn === myRole;
   setActiveRow(isMyTurn);
   updateTurnBanner(isMyTurn, view.awaitingPlayOrPass);
   renderDiscard(view.discardCards || (view.discardTop?[view.discardTop]:[]));
   updateColorRing(view.currentColor);
   renderDrawPile(view.deckCount, isMyTurn && !view.awaitingPlayOrPass);
+
+  playReactionsForTransition(App.lastView, view, myRole);
+  App.lastView = view;
 
   var oppFan = document.getElementById('opp-fan');
   var oppCards=[]; for(var i=0;i<view.oppCount;i++) oppCards.push({id:'o'+i});
@@ -1168,9 +1346,16 @@ function formatTime(){
   h = h%12; if(h===0) h=12;
   return h+':'+(m<10?'0':'')+m+' '+ampm;
 }
+function isEmojiOnly(text){
+  var stripped = text.replace(/\s/g,'');
+  if(!stripped) return false;
+  try{ return /^[\p{Extended_Pictographic}\u{FE0F}\u{200D}\u{1F3FB}-\u{1F3FF}]+$/u.test(stripped); }
+  catch(e){ return false; }
+}
 function appendChatMessage(from, text, isMe){
   var list = document.getElementById('chat-messages');
-  var row = el('div', 'chat-msg'+(isMe?' me':''));
+  var emojiOnly = isEmojiOnly(text);
+  var row = el('div', 'chat-msg'+(isMe?' me':'')+(emojiOnly?' emoji-only':''));
   var author = el('div','chat-author'); author.textContent = from;
   var bubble = el('div','chat-bubble'); bubble.textContent = text;
   var time = el('div','chat-time'); time.textContent = formatTime();
@@ -1187,31 +1372,44 @@ function sendChat(){
   send({t:'chat', from:App.myName, text:text});
 }
 
-/* ---------- Emoji + sticker reactions ---------- */
+/* ---------- Emoji + GIF/sticker reactions ---------- */
 var EMOJI_LIST = ['😀','😂','🤣','😊','😍','🥰','😘','😜','🤔','😐','😴','🤯',
   '😱','😭','😢','😡','🥳','😎','🤩','🥺','👍','👎','👏','🙌','🤝','👋','✌️','🤞',
   '🙏','💪','❤️','💛','💚','💙','💜','🖤','🤍','💔','💯','🔥','⭐','✨','🎉','🎊','🏆','🃏'];
-
 var STICKER_LIST = ['🎉','😂','🔥','👏','😱','❤️','👍','😴','🏆','💥','🤯','🙌'];
+var gifTabInitialized = false;
 
 function seededAnimClass(item){
   var sum = 0; for(var i=0;i<item.length;i++) sum += item.charCodeAt(i);
   return 'sticker-anim-'+(sum%4);
 }
+function debounce(fn, wait){
+  var t;
+  return function(){
+    var args = arguments;
+    clearTimeout(t);
+    t = setTimeout(function(){ fn.apply(null, args); }, wait);
+  };
+}
 
-function appendStickerMessage(from, sticker, isMe){
+function appendStickerMessage(from, kind, value, isMe){
   var list = document.getElementById('chat-messages');
   var row = el('div', 'chat-msg sticker-msg'+(isMe?' me':''));
   var author = el('div','chat-author'); author.textContent = from;
-  var big = el('div', 'sticker-emoji '+seededAnimClass(sticker)); big.textContent = sticker;
+  var content;
+  if(kind==='gif'){
+    content = el('img','sticker-gif-img'); content.src = value; content.alt = 'GIF';
+  } else {
+    content = el('div', 'sticker-emoji '+seededAnimClass(value)); content.textContent = value;
+  }
   var time = el('div','chat-time'); time.textContent = formatTime();
-  row.appendChild(author); row.appendChild(big); row.appendChild(time);
+  row.appendChild(author); row.appendChild(content); row.appendChild(time);
   list.appendChild(row);
   list.scrollTop = list.scrollHeight;
 }
-function sendSticker(sticker){
-  appendStickerMessage(App.myName, sticker, true);
-  send({t:'sticker', from:App.myName, sticker:sticker});
+function sendSticker(kind, value){
+  appendStickerMessage(App.myName, kind, value, true);
+  send({t:'sticker', from:App.myName, kind:kind, value:value});
   closeAllPickers();
 }
 function insertEmoji(emoji){
@@ -1221,9 +1419,16 @@ function insertEmoji(emoji){
   closeAllPickers();
 }
 function closeAllPickers(){
-  document.getElementById('emoji-picker').classList.add('hidden');
-  document.getElementById('sticker-picker').classList.add('hidden');
+  document.getElementById('reaction-picker').classList.add('hidden');
 }
+function switchPickerTab(tab){
+  document.getElementById('tab-btn-emoji').classList.toggle('active', tab==='emoji');
+  document.getElementById('tab-btn-gif').classList.toggle('active', tab==='gif');
+  document.getElementById('tab-content-emoji').classList.toggle('hidden', tab!=='emoji');
+  document.getElementById('tab-content-gif').classList.toggle('hidden', tab!=='gif');
+  if(tab==='gif' && !gifTabInitialized){ gifTabInitialized = true; buildGifTabShell(); }
+}
+
 function renderPickerGrid(containerId, items, favKey, onPick){
   var container = document.getElementById(containerId);
   container.innerHTML='';
@@ -1238,26 +1443,103 @@ function renderPickerGrid(containerId, items, favKey, onPick){
     star.addEventListener('click', function(ev){
       ev.stopPropagation();
       toggleFavorite(favKey, item);
-      renderEmojiPicker(); renderStickerPicker();
+      renderEmojiPicker();
     });
     cell.appendChild(btn); cell.appendChild(star);
     container.appendChild(cell);
   });
 }
-function renderFavSection(gridId, favKey, allOnPick){
+function renderFavSection(labelId, gridId, favKey, onPick){
   var favs = loadFavorites(favKey);
+  var label = document.getElementById(labelId);
   var container = document.getElementById(gridId);
-  if(favs.length===0){ container.innerHTML = '<div class="picker-empty">Tap ☆ on any item to add favorites</div>'; return; }
-  renderPickerGrid(gridId, favs, favKey, allOnPick);
+  if(favs.length===0){ label.classList.add('hidden'); container.innerHTML=''; return; }
+  label.classList.remove('hidden');
+  renderPickerGrid(gridId, favs, favKey, onPick);
 }
 function renderEmojiPicker(){
-  renderFavSection('emoji-fav-grid', 'uno_fav_emoji', insertEmoji);
+  renderFavSection('emoji-fav-label', 'emoji-fav-grid', 'uno_fav_emoji', insertEmoji);
   renderPickerGrid('emoji-all-grid', EMOJI_LIST, 'uno_fav_emoji', insertEmoji);
 }
-function renderStickerPicker(){
-  renderFavSection('sticker-fav-grid', 'uno_fav_sticker', sendSticker);
-  renderPickerGrid('sticker-all-grid', STICKER_LIST, 'uno_fav_sticker', sendSticker);
+
+/* ---------- GIF tab: real Giphy if a key is configured, animated stickers otherwise ---------- */
+function buildGifTabShell(){
+  var container = document.getElementById('tab-content-gif');
+  if(CONFIG.giphyApiKey){
+    container.innerHTML =
+      '<input type="text" id="gif-search-input" class="gif-search" placeholder="Search GIFs…">'+
+      '<div class="picker-section-label hidden" id="gif-fav-label">Favorites</div>'+
+      '<div class="picker-grid gif-grid" id="gif-fav-grid"></div>'+
+      '<div class="picker-section-label" id="gif-results-label">Trending</div>'+
+      '<div class="picker-grid gif-grid" id="gif-results-grid"></div>';
+    document.getElementById('gif-search-input').addEventListener('input', debounce(function(){
+      var q = document.getElementById('gif-search-input').value.trim();
+      document.getElementById('gif-results-label').textContent = q ? 'Results' : 'Trending';
+      if(q) fetchGiphySearch(q); else fetchGiphyTrending();
+    }, 450));
+    renderGifFavorites();
+    fetchGiphyTrending();
+  } else {
+    container.innerHTML =
+      '<div class="gif-key-hint">Real GIF search needs a free Giphy key — get one at '+
+      '<a href="https://developers.giphy.com" target="_blank" rel="noopener">developers.giphy.com</a> '+
+      '(2 minutes, no card) and paste it into CONFIG.giphyApiKey at the top of this file. '+
+      'Until then, here are animated reactions:</div>'+
+      '<div class="picker-grid" id="sticker-all-grid"></div>';
+    renderPickerGrid('sticker-all-grid', STICKER_LIST, 'uno_fav_sticker', function(item){ sendSticker('emoji', item); });
+  }
 }
+function fetchGiphyTrending(){
+  var url = 'https://api.giphy.com/v1/gifs/trending?api_key='+encodeURIComponent(CONFIG.giphyApiKey)+'&limit=20&rating=pg-13';
+  fetch(url).then(function(r){ return r.json(); }).then(function(data){ renderGifResults(data.data||[]); }).catch(function(){ showGifFetchError(); });
+}
+function fetchGiphySearch(query){
+  var url = 'https://api.giphy.com/v1/gifs/search?api_key='+encodeURIComponent(CONFIG.giphyApiKey)+'&q='+encodeURIComponent(query)+'&limit=20&rating=pg-13';
+  fetch(url).then(function(r){ return r.json(); }).then(function(data){ renderGifResults(data.data||[]); }).catch(function(){ showGifFetchError(); });
+}
+function showGifFetchError(){
+  var container = document.getElementById('gif-results-grid');
+  if(container) container.innerHTML = '<div class="picker-empty">Could not load GIFs — check the Giphy key in CONFIG, or your connection.</div>';
+}
+function renderGifResults(gifs){
+  var container = document.getElementById('gif-results-grid');
+  if(!container) return;
+  container.innerHTML='';
+  if(gifs.length===0){ container.innerHTML = '<div class="picker-empty">No results.</div>'; return; }
+  var favs = loadFavorites('uno_fav_gif');
+  gifs.forEach(function(g){
+    var thumbUrl = g.images && g.images.fixed_width_small && g.images.fixed_width_small.url;
+    var fullUrl = (g.images && g.images.original && g.images.original.url) || thumbUrl;
+    if(!thumbUrl) return;
+    var cell = el('div','gif-cell');
+    var img = el('img','gif-thumb'); img.src=thumbUrl; img.loading='lazy'; img.alt=g.title||'GIF';
+    img.addEventListener('click', function(){ sendSticker('gif', fullUrl); });
+    var isFav = favs.indexOf(fullUrl)>=0;
+    var star = el('button','picker-fav-star'+(isFav?' active':'')); star.type='button'; star.textContent = isFav?'★':'☆';
+    star.addEventListener('click', function(ev){ ev.stopPropagation(); toggleFavorite('uno_fav_gif', fullUrl); renderGifResults(gifs); renderGifFavorites(); });
+    cell.appendChild(img); cell.appendChild(star);
+    container.appendChild(cell);
+  });
+}
+function renderGifFavorites(){
+  var favs = loadFavorites('uno_fav_gif');
+  var label = document.getElementById('gif-fav-label');
+  var container = document.getElementById('gif-fav-grid');
+  if(!label || !container) return;
+  if(favs.length===0){ label.classList.add('hidden'); container.innerHTML=''; return; }
+  label.classList.remove('hidden');
+  container.innerHTML='';
+  favs.forEach(function(url){
+    var cell = el('div','gif-cell');
+    var img = el('img','gif-thumb'); img.src=url; img.loading='lazy'; img.alt='GIF';
+    img.addEventListener('click', function(){ sendSticker('gif', url); });
+    var star = el('button','picker-fav-star active'); star.type='button'; star.textContent='★';
+    star.addEventListener('click', function(ev){ ev.stopPropagation(); toggleFavorite('uno_fav_gif', url); renderGifFavorites(); });
+    cell.appendChild(img); cell.appendChild(star);
+    container.appendChild(cell);
+  });
+}
+
 
 /* ============================================================================
    SCREEN / LOBBY FLOW
@@ -1267,17 +1549,36 @@ function hide(id){ document.getElementById(id).classList.add('hidden'); }
 function showFieldError(fieldId, msg){ document.getElementById(fieldId).textContent = msg; }
 function enterGameScreen(){ hide('lobby-screen'); show('game-screen'); document.getElementById('win-screen').classList.add('hidden'); }
 
-function buildHeroFan(){
+function buildHeroFan(containerId){
   var demo = [
     {id:9001,color:'red',type:'skip'}, {id:9002,color:'yellow',type:'number',value:7},
     {id:9003,color:'green',type:'reverse'}, {id:9004,color:'blue',type:'draw2'},
     {id:9005,color:'wild',type:'wild'}
   ];
-  layoutFan(document.getElementById('hero-fan'), demo, true, {});
+  layoutFan(document.getElementById(containerId), demo, true, {});
+}
+function buildParticles(){
+  var container = document.getElementById('particles');
+  if(!container) return;
+  var colors = ['#ffd966','#ff8fa8','#7fe0a8','#7fc1f0','#e0a0f0'];
+  for(var i=0;i<26;i++){
+    var p = document.createElement('div');
+    p.className = 'particle';
+    var size = 2 + Math.random()*3;
+    p.style.width = size+'px'; p.style.height = size+'px';
+    p.style.left = Math.random()*100+'%';
+    p.style.top = 20+Math.random()*80+'%';
+    p.style.background = colors[i%colors.length];
+    p.style.boxShadow = '0 0 6px '+colors[i%colors.length];
+    p.style.animationDuration = (9+Math.random()*11)+'s';
+    p.style.animationDelay = (Math.random()*10)+'s';
+    container.appendChild(p);
+  }
 }
 
 document.addEventListener('DOMContentLoaded', function(){
-  buildHeroFan();
+  buildHeroFan('hero-fan');
+  buildParticles();
   App.winTally = loadWinTally();
   document.getElementById('name-input').value = CONFIG.defaultMyName;
   document.getElementById('autojoin-name-input').value = CONFIG.defaultFriendName;
@@ -1327,36 +1628,53 @@ document.addEventListener('DOMContentLoaded', function(){
   });
 
   document.getElementById('mute-btn').addEventListener('click', toggleMute);
+  document.getElementById('reconnect-btn').addEventListener('click', function(){ sfxClick(); attemptReconnect(); });
   document.getElementById('chat-send-btn').addEventListener('click', sendChat);
   document.getElementById('chat-input').addEventListener('keydown', function(ev){ if(ev.key==='Enter') sendChat(); });
 
   renderEmojiPicker();
-  renderStickerPicker();
-  document.getElementById('emoji-toggle-btn').addEventListener('click', function(ev){
+  document.getElementById('reaction-toggle-btn').addEventListener('click', function(ev){
     ev.stopPropagation();
-    var picker = document.getElementById('emoji-picker');
-    var opening = picker.classList.contains('hidden');
-    closeAllPickers();
-    if(opening){ picker.classList.remove('hidden'); }
+    var picker = document.getElementById('reaction-picker');
+    picker.classList.toggle('hidden');
   });
-  document.getElementById('sticker-toggle-btn').addEventListener('click', function(ev){
-    ev.stopPropagation();
-    var picker = document.getElementById('sticker-picker');
-    var opening = picker.classList.contains('hidden');
-    closeAllPickers();
-    if(opening){ picker.classList.remove('hidden'); }
-  });
-  document.getElementById('emoji-picker').addEventListener('click', function(ev){ ev.stopPropagation(); });
-  document.getElementById('sticker-picker').addEventListener('click', function(ev){ ev.stopPropagation(); });
+  document.getElementById('picker-close-btn').addEventListener('click', function(ev){ ev.stopPropagation(); closeAllPickers(); });
+  document.getElementById('tab-btn-emoji').addEventListener('click', function(ev){ ev.stopPropagation(); switchPickerTab('emoji'); });
+  document.getElementById('tab-btn-gif').addEventListener('click', function(ev){ ev.stopPropagation(); switchPickerTab('gif'); });
+  document.getElementById('reaction-picker').addEventListener('click', function(ev){ ev.stopPropagation(); });
   document.addEventListener('click', closeAllPickers);
 
   var params = new URLSearchParams(location.search);
   var roomParam = params.get('room');
-  if(roomParam){
-    window.__autoJoinCode = roomParam;
-    document.getElementById('autojoin-code-badge').textContent = 'Room '+roomParam.toUpperCase();
-    hide('lobby-start');
-    show('lobby-autojoin-panel');
+  if(roomParam){ window.__autoJoinCode = roomParam; }
+
+  function revealLobby(){
+    if(window.__autoJoinCode){
+      document.getElementById('autojoin-code-badge').textContent = 'Room '+window.__autoJoinCode.toUpperCase();
+      hide('lobby-start');
+      show('lobby-autojoin-panel');
+    }
+    show('lobby-screen');
+  }
+
+  if(CONFIG.accessPassword){
+    buildHeroFan('password-hero-fan');
+    show('password-screen');
+    function checkPassword(){
+      var val = document.getElementById('password-input').value;
+      if(val === CONFIG.accessPassword){
+        hide('password-screen');
+        revealLobby();
+      } else {
+        showFieldError('password-error', 'Wrong password — try again.');
+        document.getElementById('password-input').value='';
+        document.getElementById('password-input').focus();
+      }
+    }
+    document.getElementById('password-submit-btn').addEventListener('click', checkPassword);
+    document.getElementById('password-input').addEventListener('keydown', function(ev){ if(ev.key==='Enter') checkPassword(); });
+  } else {
+    revealLobby();
   }
 });
 
