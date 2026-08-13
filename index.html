@@ -175,6 +175,7 @@
   .board{width:100%; max-width:680px; display:flex; flex-direction:column; height:100%; align-items:center; position:relative; z-index:1;}
   .player-row{width:100%; display:flex; flex-direction:column; align-items:center; padding:8px 0;}
   .player-label{display:flex; align-items:center; gap:10px; font-weight:800; color:var(--cream-dim); margin-bottom:8px; font-size:.95rem;}
+  .player-label span{white-space:nowrap; flex-shrink:0;}
   .player-row.active .player-label{color:var(--amber-light);}
   .conn-status{font-size:.68rem; color:var(--red-light); font-weight:800; text-transform:uppercase; letter-spacing:.03em;}
   .reconnect-banner{position:absolute; top:64px; left:50%; transform:translateX(-50%); z-index:41;
@@ -216,36 +217,35 @@
   @keyframes unoPulse{0%,100%{transform:scale(1);}50%{transform:scale(1.08);}}
 
   /* ---------- Cards (authentic UNO badge treatment) ---------- */
-  .card{width:80px; height:114px; border-radius:11px; border:3px solid rgba(255,255,255,.9); position:relative;
+  .card{width:80px; height:114px; border-radius:11px; border:3px solid rgba(255,255,255,.95); position:relative;
     display:flex; align-items:center; justify-content:center; overflow:hidden; user-select:none; -webkit-user-select:none;
-    transition:transform .18s cubic-bezier(.34,1.56,.64,1), box-shadow .18s; flex-shrink:0;}
+    transition:transform .18s cubic-bezier(.34,1.56,.64,1), box-shadow .18s; flex-shrink:0;
+    box-shadow:inset 0 0 0 3px rgba(0,0,0,.78);}
   .card::before{content:''; position:absolute; top:-45%; left:-25%; width:55%; height:190%;
     background:linear-gradient(115deg, rgba(255,255,255,.32), rgba(255,255,255,0) 65%); transform:rotate(12deg); pointer-events:none; z-index:3;}
-  .card .badge{flex-shrink:0; width:68%; height:48%; background:var(--cream); border-radius:50%;
-    transform:rotate(-18deg); display:flex; align-items:center; justify-content:center;
-    box-shadow:0 3px 8px rgba(0,0,0,.35), inset 0 0 0 2px rgba(0,0,0,.07); z-index:1;}
+  .card .badge{flex-shrink:0; width:68%; height:50%; background:var(--cream); border-radius:50%;
+    transform:rotate(-16deg); display:flex; align-items:center; justify-content:center;
+    box-shadow:0 3px 8px rgba(0,0,0,.35), inset 0 0 0 2px rgba(0,0,0,.1); z-index:1;}
   .card .center-symbol{position:relative; z-index:2; font-family:'Lilita One', cursive; font-size:1.85rem; line-height:1;
     color:var(--sym-color); -webkit-text-stroke:1.3px rgba(0,0,0,.5);}
   .card .corner{position:absolute; font-family:'Lilita One',cursive; font-size:.72rem; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.4); z-index:2;}
   .card .corner.tl{top:6px; left:7px;} .card .corner.br{bottom:6px; right:7px; transform:rotate(180deg);}
   .card.red{background:linear-gradient(150deg,var(--red-light),var(--red) 65%); --sym-color:#c4121c;
-    box-shadow:0 4px 10px rgba(0,0,0,.4), 0 8px 22px rgba(227,27,35,.35);}
+    box-shadow:inset 0 0 0 3px rgba(0,0,0,.78), 0 4px 10px rgba(0,0,0,.4), 0 8px 22px rgba(227,27,35,.35);}
   .card.yellow{background:linear-gradient(150deg,#ffe066,#f2b300 65%); --sym-color:#a5710a;
-    box-shadow:0 4px 10px rgba(0,0,0,.4), 0 8px 22px rgba(242,179,0,.35);}
+    box-shadow:inset 0 0 0 3px rgba(0,0,0,.78), 0 4px 10px rgba(0,0,0,.4), 0 8px 22px rgba(242,179,0,.35);}
   .card.green{background:linear-gradient(150deg,var(--green-light),var(--green) 65%); --sym-color:#136b34;
-    box-shadow:0 4px 10px rgba(0,0,0,.4), 0 8px 22px rgba(31,138,70,.35);}
+    box-shadow:inset 0 0 0 3px rgba(0,0,0,.78), 0 4px 10px rgba(0,0,0,.4), 0 8px 22px rgba(31,138,70,.35);}
   .card.blue{background:linear-gradient(150deg,var(--blue-light),var(--blue) 65%); --sym-color:#084a82;
-    box-shadow:0 4px 10px rgba(0,0,0,.4), 0 8px 22px rgba(10,102,179,.35);}
+    box-shadow:inset 0 0 0 3px rgba(0,0,0,.78), 0 4px 10px rgba(0,0,0,.4), 0 8px 22px rgba(10,102,179,.35);}
   .card.wild{background:conic-gradient(from 45deg, var(--red), var(--amber), var(--green), var(--blue), var(--red)); --sym-color:#241a3d;
-    box-shadow:0 4px 10px rgba(0,0,0,.4), 0 8px 22px rgba(150,100,220,.3);}
+    box-shadow:inset 0 0 0 3px rgba(0,0,0,.78), 0 4px 10px rgba(0,0,0,.4), 0 8px 22px rgba(150,100,220,.3);}
   .card.yellow .corner{color:#5c3d00; text-shadow:0 1px 1px rgba(255,255,255,.35);}
   .card.wild .corner{color:#241a3d; text-shadow:0 1px 1px rgba(255,255,255,.3);}
-  .card.back{background:linear-gradient(160deg,#211546,#0a0620 82%); border-color:rgba(255,255,255,.55);}
-  .card.back .crest{width:56%; height:56%; border-radius:50%;
-    background:conic-gradient(from 0deg, var(--red) 0 25%, var(--amber) 25% 50%, var(--green) 50% 75%, var(--blue) 75% 100%);
-    border:3px solid rgba(255,255,255,.85); box-shadow:0 2px 10px rgba(0,0,0,.4), 0 0 18px rgba(244,180,0,.3); z-index:1;
-    animation:crestSpin 9s linear infinite;}
-  @keyframes crestSpin{to{transform:rotate(360deg);}}
+  .card.back{background:linear-gradient(160deg,#211546,#0a0620 82%); border-color:rgba(255,255,255,.7);
+    box-shadow:inset 0 0 0 3px rgba(0,0,0,.78), 0 4px 10px rgba(0,0,0,.4), 0 0 16px rgba(165,107,240,.3);}
+  .card.back .back-uno{font-family:'Lilita One',cursive; font-size:1.05rem; color:var(--amber-light); transform:rotate(-16deg);
+    text-shadow:0 0 8px rgba(244,180,0,.75), 0 1px 1px rgba(0,0,0,.5); letter-spacing:.02em;}
   .card.disabled{filter:saturate(.45) brightness(.7); cursor:default;}
   .card.playable{cursor:pointer;}
   .hand-slot{position:absolute; bottom:0; left:50%; transition:transform .3s ease; transform-origin:bottom center;}
@@ -365,7 +365,7 @@
   .sticker-anim-3{animation:stickerFloat .45s cubic-bezier(.34,1.56,.64,1);}
 
   /* emoji-only chat messages render bare and large, WhatsApp-style — no bubble background */
-  .chat-msg.emoji-only .chat-bubble{background:transparent; padding:2px 0; font-size:2.1rem; line-height:1.1;}
+  .chat-msg.emoji-only .chat-bubble{background:transparent !important; border:none !important; padding:2px 0 !important; font-size:2.1rem; line-height:1.1;}
 
   /* ---------- Win screen ---------- */
   #win-screen{position:fixed; inset:0; z-index:70; background:rgba(5,4,10,.86); display:flex; align-items:center; justify-content:center; flex-direction:column; text-align:center; overflow:hidden;}
@@ -1106,7 +1106,7 @@ function el(tag, cls){ var e=document.createElement(tag); if(cls) e.className=cl
 
 function buildCardEl(card, faceUp){
   var c = el('div','card');
-  if(!faceUp){ c.classList.add('back'); c.appendChild(el('div','crest')); return c; }
+  if(!faceUp){ c.classList.add('back'); var backText = el('span','back-uno'); backText.textContent='UNO'; c.appendChild(backText); return c; }
   c.classList.add(card.color);
   var badge = el('div','badge');
   var sym = cardSymbol(card);
