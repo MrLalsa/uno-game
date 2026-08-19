@@ -594,6 +594,15 @@
      no card needed) at developers.giphy.com → Create an App → copy the key
      here. Leave as '' and the GIF tab will just show the sticker reactions.
 
+   - turnCredentialUrl: cross-network play (not same WiFi) needs a TURN relay
+     server to get through NAT/CGNAT — this file already includes a free
+     shared one as a baseline, but it's a public static-credential pair used
+     by thousands of hobby projects, so it can be unreliable under load. For
+     your OWN dedicated free 20GB/month relay: sign up free at metered.ca →
+     make an "app" (any name) → on its dashboard find the TURN credential API
+     URL, looks like 'https://YOURAPPNAME.metered.live/api/v1/turn/credentials?apiKey=YOURKEY'
+     → paste that whole URL here. Leave as '' to just use the shared baseline.
+
    NOTE on the win-tally & emoji/sticker favorites: these are saved with the
    browser's localStorage, keyed to whoever is HOSTING a game (host brings
    their saved history along and shares it with the guest for that session).
@@ -605,10 +614,11 @@
 var CONFIG = {
   defaultMyName: 'Raj',
   defaultFriendName: 'Zoya',
-  myAvatarUrl: '',      // e.g. 'https://i.imgur.com/yourphoto.jpg'
-  friendAvatarUrl: '',  // e.g. 'https://i.imgur.com/herphoto.jpg'
-  accessPassword: '',   // e.g. 'zoyaraj' — leave '' for no password
-  giphyApiKey: ''       // paste your free key from developers.giphy.com
+  myAvatarUrl: '',       // e.g. 'https://i.imgur.com/yourphoto.jpg'
+  friendAvatarUrl: '',   // e.g. 'https://i.imgur.com/herphoto.jpg'
+  accessPassword: '',    // e.g. 'zoyaraj' — leave '' for no password
+  giphyApiKey: '',       // paste your free key from developers.giphy.com
+  turnCredentialUrl: ''  // paste your free metered.ca TURN credential URL — see note above
 };
 
 var COLORS = ['red','yellow','green','blue'];
@@ -796,38 +806,104 @@ function toggleMute(){
 /* STUN gets most home routers talking directly. TURN is the fallback relay for
    networks STUN can't punch through — CGNAT (very common on Indian mobile data
    and some ISPs' home broadband) being the big one. Without TURN, same-network
-   play works but cross-network play can silently fail — which is exactly the
-   bug this fixes. Open Relay Project is a well-known free public TURN service;
-   swap in your own credentials here later if you ever need more headroom. */
-var ICE_CONFIG = {
-  iceServers: [
-    { urls: 'stun:stun.l.google.com:19302' },
-    { urls: 'stun:openrelay.metered.ca:80' },
-    { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' },
-    { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' },
-    { urls: 'turn:openrelay.metered.ca:443?transport=tcp', username: 'openrelayproject', credential: 'openrelayproject' }
-  ]
-};
+   play works but cross-network play can silently fail.
+   The static Open Relay credentials below are a free, no-signup baseline, but
+   they're a public pair reused by thousands of hobby projects, so they can be
+   unreliable under load. If CONFIG.turnCredentialUrl is set, we fetch fresh,
+   dedicated credentials from there FIRST and use the static ones as backup
+   candidates alongside them — more candidates only ever helps. */
+var STATIC_ICE_FALLBACK = [
+  { urls: 'stun:stun.l.google.com:19302' },
+  { urls: 'stun:openrelay.metered.ca:80' },
+  { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' },
+  { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' },
+  { urls: 'turn:openrelay.metered.ca:443?transport=tcp', username: 'openrelayproject', credential: 'openrelayproject' }
+];
+function getIceServers(){
+  return new Promise(function(resolve){
+    if(!CONFIG.turnCredentialUrl){ resolve(STATIC_ICE_FALLBACK); return; }
+    fetch(CONFIG.turnCredentialUrl)
+      .then(function(r){ return r.json(); })
+      .then(function(servers){
+        var list = Array.isArray(servers) ? servers : (servers.iceServers || []);
+        resolve(list.concat(STATIC_ICE_FALLBACK));
+      })
+      .catch(function(err){
+        console.error('Custom TURN credential fetch failed, using shared fallback only:', err);
+        resolve(STATIC_ICE_FALLBACK);
+      });
+  });
+}
+
+/* Human-readable messages per PeerJS error type — 'network error' alone isn't
+   actionable, these tell you (or me, if you screenshot it) what actually broke. */
+function peerErrorMessage(err){
+  var map = {
+    'peer-unavailable': 'Room not found. Check the code, or ask them to re-share the link.',
+    'network': 'Can\u2019t reach the connection service — check your internet connection.',
+    'server-error': 'Lost contact with the matchmaking service. Try again in a moment.',
+    'socket-error': 'Lost contact with the matchmaking service. Try again in a moment.',
+    'socket-closed': 'Connection to the matchmaking service closed unexpectedly. Try again.',
+    'webrtc': 'Your browser\u2019s connection attempt failed. Try Chrome or Edge, and check if a VPN/firewall is blocking WebRTC.',
+    'browser-incompatible': 'This browser doesn\u2019t support what this game needs — try Chrome, Edge, or Firefox.',
+    'disconnected': 'Disconnected from the matchmaking service.',
+    'ssl-unavailable': 'Secure connection unavailable on this network.',
+    'unavailable-id': 'That room code is already taken — generating a new one.'
+  };
+  return map[err.type] || ('Connection error: '+err.type);
+}
+
+/* Watches the raw WebRTC connection state (not just PeerJS's own events) so a
+   slow-but-working relay negotiation doesn't look identical to a dead one. */
+function watchIceDiagnostics(conn, roleLabel){
+  var timedOut = false;
+  var slowTimer = setTimeout(function(){
+    timedOut = true;
+    showToast('Still connecting… relay networks can take a few extra seconds.');
+  }, 9000);
+  var failTimer = setTimeout(function(){
+    if(!(App.conn && App.conn.open)){
+      showToast('Connection is taking unusually long — the network on one side may be blocking WebRTC entirely.');
+    }
+  }, 25000);
+  conn.on('open', function(){ clearTimeout(slowTimer); clearTimeout(failTimer); });
+  conn.on('close', function(){ clearTimeout(slowTimer); clearTimeout(failTimer); });
+  var pc = conn.peerConnection;
+  if(pc && pc.addEventListener){
+    pc.addEventListener('iceconnectionstatechange', function(){
+      console.log('[ICE] '+roleLabel+' state:', pc.iceConnectionState);
+      if(pc.iceConnectionState==='failed'){
+        showToast('Direct + relay connection both failed on this network. Try a different network, or check CONFIG.turnCredentialUrl.');
+      }
+    });
+  }
+}
 
 function startHosting(){
   var code = makeRoomCode();
   App.role='host';
   if(App.peer && !App.peer.destroyed){ try{ App.peer.destroy(); }catch(e){} }
-  App.peer = new Peer('uno-'+code, {debug:0, config: ICE_CONFIG});
+  hide('lobby-start'); show('lobby-hosting-panel');
+  document.getElementById('hosting-status').textContent = 'Setting up connection\u2026';
+  getIceServers().then(function(iceServers){
+    App.peer = new Peer('uno-'+code, {debug:0, config: {iceServers: iceServers}});
 
-  App.peer.on('open', function(){
-    document.getElementById('share-link-input').value = shareUrl(code);
-    show('lobby-hosting-panel'); hide('lobby-start');
-  });
-  App.peer.on('connection', function(conn){
-    conn.on('data', function(msg){ handleHostIncomingConnection(conn, msg); });
-    conn.on('close', function(){ if(conn===App.conn) handleDisconnect(); });
-    conn.on('error', function(e){ console.error(e); });
-  });
-  App.peer.on('error', function(err){
-    console.error(err);
-    if(err.type==='unavailable-id'){ startHosting(); return; }
-    showToast('Connection error: '+err.type);
+    App.peer.on('open', function(){
+      document.getElementById('share-link-input').value = shareUrl(code);
+      document.getElementById('hosting-status').textContent = 'Waiting for your friend to join\u2026';
+    });
+    App.peer.on('connection', function(conn){
+      watchIceDiagnostics(conn, 'host');
+      conn.on('data', function(msg){ handleHostIncomingConnection(conn, msg); });
+      conn.on('close', function(){ if(conn===App.conn) handleDisconnect(); });
+      conn.on('error', function(e){ console.error(e); });
+    });
+    App.peer.on('error', function(err){
+      console.error(err);
+      if(err.type==='unavailable-id'){ startHosting(); return; }
+      showToast(peerErrorMessage(err));
+      hide('lobby-hosting-panel'); show('lobby-start');
+    });
   });
 }
 
@@ -872,21 +948,23 @@ function startJoining(code){
   App.lastRoomCode = code;
   App.role='guest';
   if(App.peer && !App.peer.destroyed){ try{ App.peer.destroy(); }catch(e){} }
-  App.peer = new Peer(undefined, {debug:0, config: ICE_CONFIG});
+  getIceServers().then(function(iceServers){
+    App.peer = new Peer(undefined, {debug:0, config: {iceServers: iceServers}});
 
-  App.peer.on('open', function(){
-    var conn = App.peer.connect('uno-'+code, {reliable:true});
-    App.conn = conn; wireConnection(conn);
-    conn.on('open', function(){
-      conn.send({t:'join', name:App.myName});
-      if(App.oppDisconnected){ clearDisconnectedUI(); showToast('Reconnected!'); }
-      hide('reconnect-banner');
+    App.peer.on('open', function(){
+      var conn = App.peer.connect('uno-'+code, {reliable:true});
+      App.conn = conn; wireConnection(conn);
+      watchIceDiagnostics(conn, 'guest');
+      conn.on('open', function(){
+        conn.send({t:'join', name:App.myName});
+        if(App.oppDisconnected){ clearDisconnectedUI(); showToast('Reconnected!'); }
+        hide('reconnect-banner');
+      });
     });
-  });
-  App.peer.on('error', function(err){
-    console.error(err);
-    var msg = err.type==='peer-unavailable' ? 'Room not found. Check the code and try again.' : ('Connection error: '+err.type);
-    showFieldError(activeErrorField(), msg);
+    App.peer.on('error', function(err){
+      console.error(err);
+      showFieldError(activeErrorField(), peerErrorMessage(err));
+    });
   });
 }
 
